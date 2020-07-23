@@ -2,6 +2,9 @@
 
 This is an app to manage RGB and PWM LED's from an ESP8266 board.
 
+A read only demo is available here: https://rawcdn.githack.com/sillyfrog/PrettyLights2/v1.0.0/demo/index.htm
+This gives you a feel for what's possible, and how you configure each LED in your project (I'll post a link to a video of it in action when I make it).
+
 It's designed to keep each "frame" in flash, and update all of the LED's as required, all managed via a web interface (UI).
 
 Much of the work is setup client side, rather than "real time" on the chip, allowing for a lot more flexibility. The UI allows the creation, import and export of "Patters", which can then be applied to selected LED(s). The client side UI then packages everything up in a format that's easy for the ESP to read, and uploads it.

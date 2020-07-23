@@ -1,4 +1,4 @@
-= Pretty Lights 2 =
+# Pretty Lights 2
 
 This is an app to manage RGB and PWM LED's from an ESP8266 board.
 
@@ -6,7 +6,7 @@ It's designed to keep each "frame" in flash, and update all of the LED's as requ
 
 Much of the work is setup client side, rather than "real time" on the chip, allowing for a lot more flexibility. The UI allows the creation, import and export of "Patters", which can then be applied to selected LED(s). The client side UI then packages everything up in a format that's easy for the ESP to read, and uploads it.
 
-== Initial Setup ==
+## Initial Setup
 
 This was written on (PlatformIO)[https://platformio.org/] in VSCode, so would suggest doing the same.
 
@@ -25,7 +25,7 @@ Where `1.2.3.4` in the IP address of your ESP. (Change both instances of `index.
 
 You should then be able to browse to the web interface of your ESP and start configuring things. (Please note, I have done all of my development and testing in (Firefox)[https://www.mozilla.org/en-US/exp/firefox/new/], so if you have issues, please try that first).
 
-== Hardware ==
+## Hardware
 
 I have deployed all of this on the (LOLIN D1 Mini)[https://www.wemos.cc/en/latest/d1/d1_mini.html] (or the Pro), using a (TLC5947 based PWM board)[https://www.adafruit.com/product/1429], and SK6812 based RGB LED's. Typically I use a 12v rail for the TLC5947 so I can chain several LED's together in serial, and 5v for the RGB LED's and D1.
 
@@ -33,7 +33,7 @@ See the `rgb_pin_allocations` for the pins to use for RGB LED's (each pin can ad
 
 On the TLC5947, I tie the `OE` pin to the `LAT` to help prevent flicker (although it does not help interference). For longer runs I also put inline a level shifter so the TLC5947 get 5v signals rather than 3.3v from the ESP. (I find the SK6812 is normally OK with a 3.3v signal).
 
-== Flash File Format ==
+## Flash File Format
 
 The default flash filesystem is `LittleFS`. This stores both the actual UI webpage, and the patterns configuration. I found `LittleFS` to be faster that `SPIFFS` (and it's the preferred FS moving forward).
 
@@ -66,6 +66,10 @@ I tried a number of different formats, including having a file per pattern, usin
 
 For similar reasons, a `colorpwm.dat` and `colorrgb.dat` file is used to store the config of what pattern is assigned to which LED, and the starting colour of each LED. I tried ArduinoJSON, but the overhead for the ESP was too much, and it caused issues with WiFi connectivity, outright crashing etc.
 
-== Web Interface Development ==
+## Web Interface Development
 
 If you ever want to do development on the web interface, you can do this purely locally (much faster) before uploading to the chip. To do this, please see the top of the `webdev/app.py` file.
+
+## Custom Adafruit TLC5947
+
+You may note there is a custom Adafruit TLC5947 library included. This includes a `getPWM` function to allow getting the current value set on a PWM channel, used to prevent unnecessary updates to the TLC5947 (using the same memory space, rather than doubling up RAM requirements).

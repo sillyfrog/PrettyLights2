@@ -463,6 +463,10 @@ v1.1.1
             <td id="version"></td>
           </tr>
           <tr>
+            <th>Extras Version</th>
+            <td id="extrasversion"></td>
+          </tr>
+          <tr>
             <th>Free Heap</th>
             <td id="heap"></td>
           </tr>
@@ -561,7 +565,8 @@ v1.1.1
               Reboot &amp; Reload <div class="spinner-border spinner-border-sm" role="status" id="spnrSaveHwsetup"
                 style="display: none;">
                 <span class="sr-only">Waiting...</span>
-              </div></button></div>
+              </div></button>
+          </div>
         </div>
       </div>
     </div>
@@ -1492,7 +1497,7 @@ v1.1.1
     function dataUpdate() {
       // items that have a byte count, to be converted to KB
       const datatypes = new Set(["heap", "total", "used", "free", "flashrealsize"]);
-      for (var k of ["heap", "ssid", "version", "total", "used", "free", "flashrealsize"]) {
+      for (var k of ["heap", "ssid", "version", "extrasversion", "total", "used", "free", "flashrealsize"]) {
         var txt = activeconfig[k];
         if (datatypes.has(k)) {
           txt = renderKB(txt);

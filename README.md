@@ -28,6 +28,8 @@ Where `1.2.3.4` in the IP address of your ESP. (Change both instances of `index.
 
 You should then be able to browse to the web interface of your ESP and start configuring things. (Please note, I have done all of my development and testing in (Firefox)[https://www.mozilla.org/en-US/exp/firefox/new/], so if you have issues, please try that first).
 
+The first thing in the UI to configure is *More > Hardware Configuration*, then Save and Reboot. When done and the page has reloaded, you should be able to configure patterns, and apply them to LED's.
+
 ## Hardware
 
 I have deployed all of this on the (LOLIN D1 Mini)[https://www.wemos.cc/en/latest/d1/d1_mini.html] (or the Pro), using a (TLC5947 based PWM board)[https://www.adafruit.com/product/1429], and SK6812 based RGB LED's. Typically I use a 12v rail for the TLC5947 so I can chain several LED's together in serial, and 5v for the RGB LED's and D1.

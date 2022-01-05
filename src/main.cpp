@@ -21,9 +21,12 @@
 #include <ArduinoJson.h>
 #include <ESP8266httpUpdate.h>
 
+// Include the extras for this build
+#include <pl_extras.h>
+
 #include "gamma12bit.h"
 
-#define VERSION "0.1.5"
+#define VERSION "1.0.0"
 // Frames kept in each file, each file size will increase based on the number of patterns
 // This MUST match the same constant in index.htm
 #define FRAMES_PER_FILE 25
@@ -36,13 +39,13 @@
 #define MAX_PWM_PATTERNS 50
 
 #ifdef ESP32
-#define DN 18
-#define CLK 19
+#define PWM_DN 18
+#define PWM_CLK 19
 //uint8_t pwm_lat_pin_allocations[] = {D7, D3};
 uint8_t pin_allocations[] = {15, 2, 0};
 #else
-#define DN D5
-#define CLK D6
+#define PWM_DN D5
+#define PWM_CLK D6
 uint8_t rgb_pin_allocations[] = {D1, D2, D8};
 uint8_t pwm_lat_pin_allocations[] = {D7, D3};
 #endif
@@ -355,13 +358,17 @@ void handleConfig(AsyncWebServerRequest *request)
   doc["heap"] = ESP.getFreeHeap();
   doc["ssid"] = WiFi.SSID();
   doc["version"] = VERSION;
+  doc["extrasversion"] = EXTRAS_VERSION;
   doc["total"] = fs_info.totalBytes;
   doc["used"] = fs_info.usedBytes;
   doc["free"] = fs_info.totalBytes - fs_info.usedBytes;
   doc["flashrealsize"] = ESP.getFlashChipRealSize();
   doc["flashidesize"] = ESP.getFlashChipMode();
   FlashMode_t ideMode = ESP.getFlashChipMode();
-  doc["flashmode"] = (ideMode == FM_QIO ? "QIO" : ideMode == FM_QOUT ? "QOUT" : ideMode == FM_DIO ? "DIO" : ideMode == FM_DOUT ? "DOUT" : "UNKNOWN");
+  doc["flashmode"] = (ideMode == FM_QIO ? "QIO" : ideMode == FM_QOUT ? "QOUT"
+                                              : ideMode == FM_DIO    ? "DIO"
+                                              : ideMode == FM_DOUT   ? "DOUT"
+                                                                     : "UNKNOWN");
 
   serializeJson(doc, *response);
   request->send(response);
@@ -553,7 +560,7 @@ void applyConfiguration()
 
   for (int i = 0; i < MAX_PWM_STRIPS; i++)
   {
-    pwm_strips[i] = Adafruit_TLC5947(config.boards_per_pwm_strip[i], CLK, DN, pwm_lat_pin_allocations[i]);
+    pwm_strips[i] = Adafruit_TLC5947(config.boards_per_pwm_strip[i], PWM_CLK, PWM_DN, pwm_lat_pin_allocations[i]);
     pwm_strips[i].begin();
     pwm_pixel_change[i] = true;
   }
@@ -567,7 +574,7 @@ void blankPWM()
   for (int i = 0; i < MAX_PWM_STRIPS; i++)
   {
     // Init'ing the Adafruit_TLC5947 sets all values to 0 automatically
-    Adafruit_TLC5947 pwm_strip = Adafruit_TLC5947(MAX_PWM_BOARD_PER_STRIP, CLK, DN, pwm_lat_pin_allocations[i]);
+    Adafruit_TLC5947 pwm_strip = Adafruit_TLC5947(MAX_PWM_BOARD_PER_STRIP, PWM_CLK, PWM_DN, pwm_lat_pin_allocations[i]);
     pwm_strip.begin();
     pwm_strip.write();
   }
@@ -796,6 +803,9 @@ void setup()
   Serial.println("👋");
   Serial.print("Version: ");
   Serial.println(VERSION);
+
+  extrasPreSetup();
+
   blankPWM();
   delay(50);
 
@@ -847,6 +857,8 @@ void setup()
   server.on("/assign", HTTP_POST, handleAssign);
   server.begin();
   nextupdate = millis();
+
+  extrasPostSetup();
 }
 
 uint16 waitloop = 0;
@@ -880,10 +892,12 @@ void loop()
       setRGBFrame(currentframe);
       delay(0);
       setPWMFrame(currentframe);
+      extrasPostFrameSet(currentframe);
       frameset = true;
     }
     if (now >= nextupdate)
     {
+      extrasPreFrameApply(currentframe);
       currentframe++;
       if (currentframe >= config.frame_count)
       {
@@ -946,4 +960,6 @@ void loop()
     delay(10);
     ESP.restart();
   }
+
+  extrasLoop();
 }
